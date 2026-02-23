@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use nanoclaw_core::config::RuntimeConfig;
 use nanoclaw_core::e2e::run_file_e2e;
@@ -16,6 +16,19 @@ fn print_usage() {
     println!("nanoclawd usage:");
     println!("  --dry-run");
     println!("  --e2e --input <path> --output <path> [--assistant-name <name>]");
+}
+
+fn print_missing_input_hint(input: &Path) {
+    eprintln!(
+        "input file does not exist: {}\n\
+Create one first (tab-separated: timestamp\\tchat_jid\\tsender_name\\tcontent):\n\
+  cat > {} <<'EOF'\n\
+  2026-01-01T00:00:01Z\tgroup-a\tAlice\tHello from A\n\
+  2026-01-01T00:00:02Z\tgroup-b\tBob\tHello from B\n\
+  EOF",
+        input.display(),
+        input.display()
+    );
 }
 
 fn main() {
@@ -48,6 +61,11 @@ fn main() {
                 std::process::exit(2);
             }
         };
+
+        if !input.exists() {
+            print_missing_input_hint(&input);
+            std::process::exit(2);
+        }
 
         let assistant_name = parse_opt(&args, "--assistant-name").unwrap_or(cfg.assistant_name);
 

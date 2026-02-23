@@ -165,3 +165,22 @@ This validates the current Rust path for:
 - output generation
 
 It is a migration bridge and not yet a full replacement for production channel/container integration.
+
+### Troubleshooting: `No such file or directory` on `--e2e --input`
+
+If you see an input-file error, create the input fixture first:
+
+```bash
+cat > /tmp/nanoclaw-e2e-input.tsv <<'EOF'
+2026-01-01T00:00:01Z	group-a	Alice	Hello from A
+2026-01-01T00:00:02Z	group-b	Bob	Hello from B
+EOF
+```
+
+Then run:
+
+```bash
+cd rust
+cargo run -p nanoclawd -- --e2e --input /tmp/nanoclaw-e2e-input.tsv --output /tmp/nanoclaw-e2e-output.tsv
+```
+

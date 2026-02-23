@@ -89,6 +89,16 @@ mod tests {
         std::env::temp_dir().join(format!("nanoclaw-{}-{}", name, nanos))
     }
 
+
+    #[test]
+    fn returns_clear_error_for_missing_input_file() {
+        let input = unique_path("missing-input.tsv");
+        let output = unique_path("unused-output.tsv");
+
+        let err = run_file_e2e("Andy", &input, &output).expect_err("missing input should error");
+        assert!(err.contains("failed reading input file"));
+    }
+
     #[test]
     fn processes_input_file_and_writes_group_outputs() {
         let input = unique_path("in.txt");
