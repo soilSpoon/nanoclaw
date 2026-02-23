@@ -20,7 +20,7 @@ Ship a Rust-native runtime that replaces the current Node.js process while prese
 - [x] `nanoclawd --dry-run` bootstrap binary added
 - [x] Ported in-memory DB API surface parity for core state/session/group/message access (SQLite-backed persistence pending)
 - [x] Ported runtime queue/message prompt assembly flow into `nanoclaw-core::runtime`
-- [ ] Port container-runner streaming marker parser parity
+- [x] Ported container output marker parsing into `nanoclaw-core::container_output` with multi-marker tests
 
 
 ## Non-Goals (Phase 1)
@@ -184,3 +184,25 @@ cd rust
 cargo run -p nanoclawd -- --e2e --input /tmp/nanoclaw-e2e-input.tsv --output /tmp/nanoclaw-e2e-output.tsv
 ```
 
+
+## Rust-First Local Commands
+
+If you are migrating away from Node.js, use this Rust-only command set:
+
+```bash
+cd rust
+cargo build
+cargo test
+
+printf "2026-01-01T00:00:01Z\tgroup-a\tAlice\tHello from A\n2026-01-01T00:00:02Z\tgroup-b\tBob\tHello from B\n" > /tmp/nanoclaw-e2e-input.tsv
+
+cargo run -p nanoclawd -- --e2e --input /tmp/nanoclaw-e2e-input.tsv --output /tmp/nanoclaw-e2e-output.tsv
+cat /tmp/nanoclaw-e2e-output.tsv
+```
+
+Parse raw container stdout markers into TSV records:
+
+```bash
+cargo run -p nanoclawd -- --parse-container-output --input /tmp/container-stdout.log --output /tmp/container-parsed.tsv
+cat /tmp/container-parsed.tsv
+```
