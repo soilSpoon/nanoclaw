@@ -229,3 +229,15 @@ cargo run -p nanoclawd -- --daemon --ipc-dir /tmp/nanoclaw-ipc --assistant-name 
 ```
 
 Then drop message batch files into `/tmp/nanoclaw-ipc/messages/*.tsv`; responses are appended to `/tmp/nanoclaw-ipc/output/responses.tsv`.
+
+
+## Rust Runtime as Default Path
+
+Use the Rust daemon as the primary runtime loop:
+
+```bash
+npm run rust:build
+./scripts/run-rust-daemon.sh
+```
+
+For macOS launchd, use `launchd/com.nanoclaw-rust.plist` as the service template.

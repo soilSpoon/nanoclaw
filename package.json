@@ -14,7 +14,11 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "setup": "tsx setup/index.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "rust:build": "cd rust && cargo build --release",
+    "rust:test": "cd rust && cargo test",
+    "rust:start": "cd rust && cargo run -p nanoclawd -- --daemon --ipc-dir ../data/ipc/main --assistant-name ${ASSISTANT_NAME:-Andy}",
+    "rust:parse-output": "cd rust && cargo run -p nanoclawd -- --parse-container-output --input /tmp/container-stdout.log --output /tmp/container-parsed.tsv"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc.9",
