@@ -1,4 +1,6 @@
 use std::path::{Path, PathBuf};
+use std::thread;
+use std::time::Duration;
 
 use nanoclaw_core::config::RuntimeConfig;
 use nanoclaw_core::container_output::parse_streamed_outputs;
@@ -15,12 +17,19 @@ fn parse_opt(args: &[String], name: &str) -> Option<String> {
     args.get(idx + 1).cloned()
 }
 
+fn parse_opt_u64(args: &[String], name: &str, default: u64) -> u64 {
+    parse_opt(args, name)
+        .and_then(|v| v.parse::<u64>().ok())
+        .unwrap_or(default)
+}
+
 fn print_usage() {
     println!("nanoclawd usage:");
     println!("  --dry-run");
     println!("  --e2e --input <path> --output <path> [--assistant-name <name>]");
     println!("  --parse-container-output --input <path> --output <path>");
     println!("  --run-ipc-once --ipc-dir <path> [--assistant-name <name>] [--since <iso-ts>]");
+    println!("  --daemon --ipc-dir <path> [--assistant-name <name>] [--since <iso-ts>] [--poll-ms <ms>]");
 }
 
 fn print_missing_input_hint(input: &Path) {
@@ -56,6 +65,17 @@ fn require_io_paths(args: &[String], mode: &str) -> (PathBuf, PathBuf) {
     };
 
     (input, output)
+}
+
+fn require_ipc_dir(args: &[String], mode: &str) -> PathBuf {
+    match parse_opt(args, "--ipc-dir") {
+        Some(v) => PathBuf::from(v),
+        None => {
+            eprintln!("missing --ipc-dir for {}", mode);
+            print_usage();
+            std::process::exit(2);
+        }
+    }
 }
 
 fn run_parse_container_output(input: &Path, output: &Path) {
@@ -98,14 +118,7 @@ fn run_parse_container_output(input: &Path, output: &Path) {
 }
 
 fn run_ipc_once_mode(args: &[String], default_assistant_name: &str) {
-    let ipc_dir = match parse_opt(args, "--ipc-dir") {
-        Some(v) => PathBuf::from(v),
-        None => {
-            eprintln!("missing --ipc-dir for --run-ipc-once");
-            print_usage();
-            std::process::exit(2);
-        }
-    };
+    let ipc_dir = require_ipc_dir(args, "--run-ipc-once");
 
     let assistant_name = parse_opt(args, "--assistant-name")
         .unwrap_or_else(|| default_assistant_name.to_string());
@@ -125,6 +138,37 @@ fn run_ipc_once_mode(args: &[String], default_assistant_name: &str) {
             eprintln!("nanoclawd ipc run failed: {}", err);
             std::process::exit(1);
         }
+    }
+}
+
+fn run_daemon_mode(args: &[String], default_assistant_name: &str) {
+    let ipc_dir = require_ipc_dir(args, "--daemon");
+    let assistant_name = parse_opt(args, "--assistant-name")
+        .unwrap_or_else(|| default_assistant_name.to_string());
+    let since = parse_opt(args, "--since").unwrap_or_default();
+    let poll_ms = parse_opt_u64(args, "--poll-ms", 1000);
+
+    println!(
+        "nanoclawd daemon started: ipc_dir={} assistant_name={} poll_ms={}",
+        ipc_dir.display(),
+        assistant_name,
+        poll_ms
+    );
+
+    let mut runtime = Runtime::new(assistant_name.clone(), 4);
+    loop {
+        match run_ipc_once(&mut runtime, &ipc_dir, &since, &assistant_name) {
+            Ok(processed) => {
+                if processed > 0 {
+                    println!("nanoclawd daemon processed_groups={}", processed);
+                }
+            }
+            Err(err) => {
+                eprintln!("nanoclawd daemon loop error: {}", err);
+            }
+        }
+
+        thread::sleep(Duration::from_millis(poll_ms));
     }
 }
 
@@ -148,6 +192,11 @@ fn main() {
 
     if parse_flag(&args, "--run-ipc-once") {
         run_ipc_once_mode(&args, &cfg.assistant_name);
+        return;
+    }
+
+    if parse_flag(&args, "--daemon") {
+        run_daemon_mode(&args, &cfg.assistant_name);
         return;
     }
 

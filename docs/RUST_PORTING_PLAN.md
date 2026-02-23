@@ -22,6 +22,7 @@ Ship a Rust-native runtime that replaces the current Node.js process while prese
 - [x] Ported runtime queue/message prompt assembly flow into `nanoclaw-core::runtime`
 - [x] Ported container output marker parsing into `nanoclaw-core::container_output` with multi-marker tests
 - [x] Added one-shot IPC polling mode in `nanoclawd` (`--run-ipc-once`) for filesystem-driven local orchestration tests
+- [x] Added daemon polling mode in `nanoclawd` (`--daemon --ipc-dir`) for continuous filesystem orchestration
 
 
 ## Non-Goals (Phase 1)
@@ -218,3 +219,13 @@ printf "2026-01-01T00:00:01Z\tg1\tAlice\tHello from IPC\n" > /tmp/nanoclaw-ipc/m
 cargo run -p nanoclawd -- --run-ipc-once --ipc-dir /tmp/nanoclaw-ipc --assistant-name Andy
 cat /tmp/nanoclaw-ipc/output/responses.tsv
 ```
+
+
+Run continuous daemon mode (polling filesystem IPC):
+
+```bash
+mkdir -p /tmp/nanoclaw-ipc/messages
+cargo run -p nanoclawd -- --daemon --ipc-dir /tmp/nanoclaw-ipc --assistant-name Andy --poll-ms 1000
+```
+
+Then drop message batch files into `/tmp/nanoclaw-ipc/messages/*.tsv`; responses are appended to `/tmp/nanoclaw-ipc/output/responses.tsv`.
