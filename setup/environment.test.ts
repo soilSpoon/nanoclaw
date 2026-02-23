@@ -61,19 +61,39 @@ describe('registered groups DB query', () => {
 describe('credentials detection', () => {
   it('detects ANTHROPIC_API_KEY in env content', () => {
     const content = 'SOME_KEY=value\nANTHROPIC_API_KEY=sk-ant-test123\nOTHER=foo';
-    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY)=/m.test(content);
+    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY|OPENAI_OAUTH_ACCESS_TOKEN|CODEX_OAUTH_TOKEN|OPENAI_API_KEY)=/m.test(content);
     expect(hasCredentials).toBe(true);
   });
 
   it('detects CLAUDE_CODE_OAUTH_TOKEN in env content', () => {
     const content = 'CLAUDE_CODE_OAUTH_TOKEN=token123';
-    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY)=/m.test(content);
+    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY|OPENAI_OAUTH_ACCESS_TOKEN|CODEX_OAUTH_TOKEN|OPENAI_API_KEY)=/m.test(content);
+    expect(hasCredentials).toBe(true);
+  });
+
+
+
+  it('detects OPENAI_OAUTH_ACCESS_TOKEN in env content', () => {
+    const content = 'OPENAI_OAUTH_ACCESS_TOKEN=eyJhbGciOi...';
+    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY|OPENAI_OAUTH_ACCESS_TOKEN|CODEX_OAUTH_TOKEN|OPENAI_API_KEY)=/m.test(content);
+    expect(hasCredentials).toBe(true);
+  });
+
+  it('detects CODEX_OAUTH_TOKEN in env content', () => {
+    const content = 'CODEX_OAUTH_TOKEN=codex-token';
+    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY|OPENAI_OAUTH_ACCESS_TOKEN|CODEX_OAUTH_TOKEN|OPENAI_API_KEY)=/m.test(content);
+    expect(hasCredentials).toBe(true);
+  });
+
+  it('detects OPENAI_API_KEY in env content', () => {
+    const content = 'OPENAI_API_KEY=sk-openai-test';
+    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY|OPENAI_OAUTH_ACCESS_TOKEN|CODEX_OAUTH_TOKEN|OPENAI_API_KEY)=/m.test(content);
     expect(hasCredentials).toBe(true);
   });
 
   it('returns false when no credentials', () => {
     const content = 'ASSISTANT_NAME="Andy"\nOTHER=foo';
-    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY)=/m.test(content);
+    const hasCredentials = /^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY|OPENAI_OAUTH_ACCESS_TOKEN|CODEX_OAUTH_TOKEN|OPENAI_API_KEY)=/m.test(content);
     expect(hasCredentials).toBe(false);
   });
 });

@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "nanoclaw-core",
+  "nanoclawd",
+]
+resolver = "2"
