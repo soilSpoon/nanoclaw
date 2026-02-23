@@ -3,6 +3,8 @@ use std::path::{Path, PathBuf};
 use nanoclaw_core::config::RuntimeConfig;
 use nanoclaw_core::container_output::parse_streamed_outputs;
 use nanoclaw_core::e2e::run_file_e2e;
+use nanoclaw_core::ipc_loop::run_ipc_once;
+use nanoclaw_core::runtime::Runtime;
 
 fn parse_flag(args: &[String], name: &str) -> bool {
     args.iter().any(|a| a == name)
@@ -18,6 +20,7 @@ fn print_usage() {
     println!("  --dry-run");
     println!("  --e2e --input <path> --output <path> [--assistant-name <name>]");
     println!("  --parse-container-output --input <path> --output <path>");
+    println!("  --run-ipc-once --ipc-dir <path> [--assistant-name <name>] [--since <iso-ts>]");
 }
 
 fn print_missing_input_hint(input: &Path) {
@@ -94,6 +97,37 @@ fn run_parse_container_output(input: &Path, output: &Path) {
     );
 }
 
+fn run_ipc_once_mode(args: &[String], default_assistant_name: &str) {
+    let ipc_dir = match parse_opt(args, "--ipc-dir") {
+        Some(v) => PathBuf::from(v),
+        None => {
+            eprintln!("missing --ipc-dir for --run-ipc-once");
+            print_usage();
+            std::process::exit(2);
+        }
+    };
+
+    let assistant_name = parse_opt(args, "--assistant-name")
+        .unwrap_or_else(|| default_assistant_name.to_string());
+    let since = parse_opt(args, "--since").unwrap_or_default();
+
+    let mut runtime = Runtime::new(assistant_name.clone(), 4);
+
+    match run_ipc_once(&mut runtime, &ipc_dir, &since, &assistant_name) {
+        Ok(processed) => {
+            println!(
+                "nanoclawd ipc run complete: processed_groups={} ipc_dir={}",
+                processed,
+                ipc_dir.display()
+            );
+        }
+        Err(err) => {
+            eprintln!("nanoclawd ipc run failed: {}", err);
+            std::process::exit(1);
+        }
+    }
+}
+
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
     let cfg = RuntimeConfig::from_env();
@@ -109,6 +143,11 @@ fn main() {
     if parse_flag(&args, "--parse-container-output") {
         let (input, output) = require_io_paths(&args, "--parse-container-output");
         run_parse_container_output(&input, &output);
+        return;
+    }
+
+    if parse_flag(&args, "--run-ipc-once") {
+        run_ipc_once_mode(&args, &cfg.assistant_name);
         return;
     }
 

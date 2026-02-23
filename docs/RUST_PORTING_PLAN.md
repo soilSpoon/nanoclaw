@@ -21,6 +21,7 @@ Ship a Rust-native runtime that replaces the current Node.js process while prese
 - [x] Ported in-memory DB API surface parity for core state/session/group/message access (SQLite-backed persistence pending)
 - [x] Ported runtime queue/message prompt assembly flow into `nanoclaw-core::runtime`
 - [x] Ported container output marker parsing into `nanoclaw-core::container_output` with multi-marker tests
+- [x] Added one-shot IPC polling mode in `nanoclawd` (`--run-ipc-once`) for filesystem-driven local orchestration tests
 
 
 ## Non-Goals (Phase 1)
@@ -205,4 +206,15 @@ Parse raw container stdout markers into TSV records:
 ```bash
 cargo run -p nanoclawd -- --parse-container-output --input /tmp/container-stdout.log --output /tmp/container-parsed.tsv
 cat /tmp/container-parsed.tsv
+```
+
+
+Run one-shot IPC polling mode (filesystem message batches):
+
+```bash
+mkdir -p /tmp/nanoclaw-ipc/messages
+printf "2026-01-01T00:00:01Z\tg1\tAlice\tHello from IPC\n" > /tmp/nanoclaw-ipc/messages/batch-1.tsv
+
+cargo run -p nanoclawd -- --run-ipc-once --ipc-dir /tmp/nanoclaw-ipc --assistant-name Andy
+cat /tmp/nanoclaw-ipc/output/responses.tsv
 ```
