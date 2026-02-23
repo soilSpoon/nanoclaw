@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.nanoclaw</string>
+    <string>com.nanoclaw.rust</string>
     <key>ProgramArguments</key>
     <array>
         <string>{{PROJECT_ROOT}}/scripts/run-rust-daemon.sh</string>
@@ -28,8 +28,8 @@
         <string>1000</string>
     </dict>
     <key>StandardOutPath</key>
-    <string>{{PROJECT_ROOT}}/logs/nanoclaw.log</string>
+    <string>{{PROJECT_ROOT}}/logs/nanoclaw-rust.log</string>
     <key>StandardErrorPath</key>
-    <string>{{PROJECT_ROOT}}/logs/nanoclaw.error.log</string>
+    <string>{{PROJECT_ROOT}}/logs/nanoclaw-rust.error.log</string>
 </dict>
 </plist>
