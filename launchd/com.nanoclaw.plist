@@ -6,8 +6,7 @@
     <string>com.nanoclaw</string>
     <key>ProgramArguments</key>
     <array>
-        <string>{{NODE_PATH}}</string>
-        <string>{{PROJECT_ROOT}}/dist/index.js</string>
+        <string>{{PROJECT_ROOT}}/scripts/run-rust-daemon.sh</string>
     </array>
     <key>WorkingDirectory</key>
     <string>{{PROJECT_ROOT}}</string>
@@ -23,6 +22,10 @@
         <string>{{HOME}}</string>
         <key>ASSISTANT_NAME</key>
         <string>Andy</string>
+        <key>NANOCLAW_IPC_DIR</key>
+        <string>{{PROJECT_ROOT}}/data/ipc/main</string>
+        <key>NANOCLAW_POLL_MS</key>
+        <string>1000</string>
     </dict>
     <key>StandardOutPath</key>
     <string>{{PROJECT_ROOT}}/logs/nanoclaw.log</string>

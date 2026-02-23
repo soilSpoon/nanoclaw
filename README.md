@@ -21,7 +21,18 @@
 
 NanoClaw gives you the same core functionality in a codebase you can understand in 8 minutes. One process. A handful of files. Agents run in actual Linux containers with filesystem isolation, not behind permission checks.
 
-## Quick Start
+## Quick Start (Rust Runtime)
+
+```bash
+git clone https://github.com/qwibitai/nanoclaw.git
+cd nanoclaw
+npm run rust:build
+./scripts/run-rust-daemon.sh
+```
+
+Drop message batch files into `data/ipc/main/messages/*.tsv` and read responses from `data/ipc/main/output/responses.tsv`.
+
+### Legacy Node/Claude Path
 
 ```bash
 git clone https://github.com/qwibitai/nanoclaw.git
@@ -29,7 +40,7 @@ cd nanoclaw
 claude
 ```
 
-Then run `/setup`. Claude Code handles everything: dependencies, authentication, container setup, service configuration.
+Then run `/setup`.
 
 ## Philosophy
 
@@ -122,8 +133,9 @@ Skills we'd like to see:
 ## Requirements
 
 - macOS or Linux
-- Node.js 20+
-- [Claude Code](https://claude.ai/download)
+- Rust toolchain (cargo/rustc)
+- Node.js 20+ (legacy path only)
+- [Claude Code](https://claude.ai/download) (legacy path only)
 - [Apple Container](https://github.com/apple/container) (macOS) or [Docker](https://docker.com/products/docker-desktop) (macOS/Linux)
 
 ## Architecture
